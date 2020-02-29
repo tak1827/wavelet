@@ -54,8 +54,8 @@ var (
 
 	// Snowball consensus protocol parameters.
 	SnowballK     = 2
-	SnowballAlpha = 0.8
-	SnowballBeta  = 50
+	SnowballAlpha = 0.6
+	SnowballBeta  = 10
 
 	// Timeout for querying a transaction to K peers.
 	QueryTimeout = 1 * time.Second
@@ -71,7 +71,7 @@ var (
 	MaxDownloadDepthDiff uint64 = 1500
 
 	// Max number of parents referencable by a transaction.
-	MaxParentsPerTransaction = 32
+	MaxParentsPerTransaction = 8
 
 	// Minimum difficulty to define a critical transaction.
 	MinDifficulty byte = 8

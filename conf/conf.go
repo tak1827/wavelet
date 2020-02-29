@@ -56,10 +56,10 @@ func init() {
 func defaultConfig() config {
 	defConf := config{
 		snowballK:    2,
-		snowballBeta: 50,
+		snowballBeta: 10,
 
-		syncVoteThreshold:             0.8,
-		finalizationVoteThreshold:     0.8,
+		syncVoteThreshold:             0.6,
+		finalizationVoteThreshold:     0.6,
 		stakeMajorityWeight:           1,
 		transactionsNumMajorityWeight: 0.3,
 		roundDepthMajorityWeight:      0.3,
