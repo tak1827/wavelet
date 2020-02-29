@@ -31,6 +31,7 @@ import (
 	"sort"
 	"strconv"
 	"time"
+	"github.com/davecgh/go-spew/spew"
 
 	"github.com/perlin-network/wavelet/conf"
 
@@ -297,6 +298,7 @@ func Run(args []string, stdin io.ReadCloser, stdout io.Writer, withoutGC bool) {
 }
 
 func start(cfg *Config, stdin io.ReadCloser, stdout io.Writer) {
+	spew.Dump(cfg)
 	log.SetLevel(cfg.LogLevel)
 	logger := log.Node()
 
