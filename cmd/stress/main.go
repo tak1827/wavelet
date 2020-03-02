@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"github.com/perlin-network/wavelet/wctl"
 	// "github.com/davecgh/go-spew/spew"
+	"sync"
 )
 
 var (
@@ -40,25 +41,43 @@ func main() {
 
 	// Loop sending tx
 	for {
+		var wg sync.WaitGroup
+		wg.Add(numWorkers)
 		chErr := make(chan error, numWorkers)
 
 		for i := 0; i < numWorkers; i++ {
-			go sendTx(client, chErr)
+			go sendTx(client, &wg, chErr)
 		}
 
+		wg.Wait()
+
+		// var counter int
+		// for err = range chErr {
+		// 	if err != nil {
+		// 		log.Fatal(err.Error())
+		// 	}
+
+		// 	// Close chan if the last
+		// 	counter++
+		// 	if counter == numWorkers {
+		// 		close(chErr)
+		// 	}
+		// }
 
 		for i := 0; i < numWorkers; i++ {
 			if e := <-chErr; e != nil {
-				log.Fatal(e.Error())
+				log.Print(e.Error())
 			}
 		}
-
 	}
 }
 
 func sendTx(
 	client *wctl.Client,
+	wg *sync.WaitGroup,
 	chErr chan error) {
+
+	defer wg.Done()
 	// Send Non type tx
 	payload := bytes.NewBuffer(nil)
 	_, err := client.SendTransaction(byte(tag), payload.Bytes())

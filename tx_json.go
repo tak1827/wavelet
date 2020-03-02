@@ -28,6 +28,7 @@ import (
 	"github.com/perlin-network/wavelet/sys"
 	"github.com/pkg/errors"
 	"github.com/valyala/fastjson"
+	// "github.com/davecgh/go-spew/spew"
 )
 
 const (
@@ -449,15 +450,20 @@ func parseBatch(data []byte) ([]byte, error) {
 	payload.Write(batchLength[:4]) // Write batch length
 
 	for _, tx := range transactions { // Iterate through transactions
-		txJSON, err := tx.StringBytes() // Get JSON
-		if err != nil {                 // Check for errors
-			return nil, err // Return found error
-		}
+		// txJSON, err := tx.StringBytes() // Get JSON
+		// if err != nil {                 // Check for errors
+		// 	return nil, err // Return found error
+		// }
+
+		txJSON := tx.GetStringBytes("payload")
+		// spew.Dump(txJSON)
 
 		txPayload, err := ParseJSON(txJSON, string(tx.GetStringBytes("tag"))) // Parse JSON
 		if err != nil {                                                       // Check for errors
 			return nil, err // Return found error
 		}
+
+		// spew.Dump(txPayload)
 
 		_, err = payload.Write(txPayload) // Write payload
 		if err != nil {                   // Check for errors
