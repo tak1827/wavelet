@@ -93,15 +93,15 @@ func ParseJSON(data []byte, tag string) ([]byte, error) {
 	}
 
 	switch tag { // Handle different tag types
-	case "nop":
+	case "0"://non
 		return nil, nil // Nothing to do!
-	case "transfer":
+	case "1"://transfer
 		return parseTransfer(data) // Parse
-	case "stake":
+	case "2"://stake
 		return parseStake(data) // Parse
-	case "contract":
+	case "3"://contract
 		return parseContract(data) // Parse
-	case "batch":
+	case "4"://batch
 		return parseBatch(data) // Parse
 	}
 

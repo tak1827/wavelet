@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 	"github.com/perlin-network/wavelet/sys"
+	"github.com/davecgh/go-spew/spew"
 )
 
 type config struct {
@@ -340,6 +341,8 @@ func Update(options ...Option) {
 	}
 
 	updateWeights()
+
+	spew.Dump(c)
 
 	l.Unlock()
 }
