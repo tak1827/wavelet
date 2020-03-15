@@ -104,11 +104,17 @@ func parseBearerToken(auth string) string {
 }
 
 func oAuth2(ctx *fasthttp.RequestCtx) string {
-	if auth := ctx.Request.Header.Peek("Authorization"); auth == nil {
+	// if auth := ctx.Request.Header.Peek("Authorization"); auth == nil {
+	// 	return ""
+	// } else {
+	// 	return parseBearerToken(string(auth))
+	// }
+	auth := ctx.Request.Header.Peek("Authorization")
+	if auth == nil {
 		return ""
-	} else {
-		return parseBearerToken(string(auth))
 	}
+
+	return parseBearerToken(string(auth))
 }
 
 func (g *Gateway) auth(next fasthttp.RequestHandler) fasthttp.RequestHandler {

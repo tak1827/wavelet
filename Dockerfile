@@ -12,7 +12,7 @@ RUN (cd /src; go mod download)
 
 ADD . /src
 RUN (cd /src/cmd/wavelet; go build)
-RUN (cd /src/cmd/client; go build sender.go)
+# RUN (cd /src/cmd/client; go build sender.go)
 
 # **************************************************
 # sshd
@@ -69,7 +69,7 @@ COPY supervisord.conf /etc/supervisord.conf
 # **************************************************
 
 COPY --from=build /src/cmd/wavelet/ /home/ssh-user/
-COPY --from=build /src/cmd/client/ /home/ssh-user/
+# COPY --from=build /src/cmd/client/ /home/ssh-user/
 
 EXPOSE 3000
 EXPOSE 9000

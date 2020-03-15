@@ -44,6 +44,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/peer"
+	"github.com/davecgh/go-spew/spew"
 )
 
 type bitset uint8
@@ -712,6 +713,8 @@ FINALIZE_ROUNDS:
 
 			results, err := l.collapseTransactions(current.Index+1, current.End, *eligible, false)
 			if err != nil {
+				spew.Dump("========================")
+				spew.Dump(results)
 				logger := log.Node()
 				logger.Error().
 					Err(err).
@@ -904,6 +907,8 @@ FINALIZE_ROUNDS:
 		results, err := l.collapseTransactions(preferred.Index, preferred.Start, preferred.End, true)
 		if err != nil {
 			if !strings.Contains(err.Error(), "missing ancestor") {
+				spew.Dump("++++++++++++++++++++++++++++")
+				spew.Dump(results)
 				logger := log.Node()
 				logger.Error().
 					Err(err).

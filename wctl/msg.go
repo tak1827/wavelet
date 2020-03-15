@@ -29,6 +29,7 @@ const (
 	RouteContract = "/contract"
 	RouteTxList   = "/tx"
 	RouteTxSend   = "/tx/send"
+	RouteConnect   = "/node/connect"
 
 	RouteWSBroadcaster  = "/poll/broadcaster"
 	RouteWSConsensus    = "/poll/consensus"
@@ -48,9 +49,16 @@ var (
 	_ UnmarshalableJSON = (*Transaction)(nil)
 	_ UnmarshalableJSON = (*TransactionList)(nil)
 	_ UnmarshalableJSON = (*Account)(nil)
+	_ UnmarshalableJSON = (*ConnectResponse)(nil)
 
 	_ MarshalableJSON = (*SendTransactionRequest)(nil)
 )
+
+type jsonRaw []byte
+
+func (j jsonRaw) MarshalJSON() ([]byte, error) {
+	return j, nil
+}
 
 type UnmarshalableJSON interface {
 	UnmarshalJSON([]byte) error
@@ -243,6 +251,24 @@ func (a *Account) UnmarshalJSON(b []byte) error {
 	a.Stake = v.GetUint64("stake")
 	a.IsContract = v.GetBool("is_contract")
 	a.NumPages = v.GetUint64("num_mem_pages")
+
+	return nil
+}
+
+
+type ConnectResponse struct {
+	Message string `json:"msg"`
+}
+
+func (c *ConnectResponse) UnmarshalJSON(b []byte) error {
+	var parser fastjson.Parser
+
+	v, err := parser.ParseBytes(b)
+	if err != nil {
+		return err
+	}
+
+	c.Message = string(v.GetStringBytes("msg"))
 
 	return nil
 }

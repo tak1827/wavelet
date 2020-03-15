@@ -49,6 +49,8 @@ import (
 	"google.golang.org/grpc"
 	"gopkg.in/urfave/cli.v1"
 	"gopkg.in/urfave/cli.v1/altsrc"
+	"crypto/sha512"
+	"encoding/base64"
 
 	_ "net/http/pprof"
 )
@@ -267,12 +269,26 @@ func Run(args []string, stdin io.ReadCloser, stdout io.Writer, withoutGC bool) {
 			}
 		}
 
+		// Grab the secret
+		secret := c.String("api.secret")
+			if secret == "" {
+			// If the secret is empty, derive the secret from the base64-hashed
+			// sha224-hashed private key.
+			h, err := hex.DecodeString(secret)
+			if err != nil {
+				return errors.Wrap(err, "Can't decode wallet")
+			}
+
+			sha := sha512.Sum512_224(h)
+			secret = base64.StdEncoding.EncodeToString(sha[:])
+		}
+
 		conf.Update(
 			conf.WithSnowballK(c.Int("sys.snowball.k")),
 			conf.WithSnowballBeta(c.Int("sys.snowball.beta")),
 			conf.WithQueryTimeout(c.Duration("sys.query_timeout")),
 			conf.WithMaxDepthDiff(c.Uint64("sys.max_depth_diff")),
-			conf.WithSecret(c.String("api.secret")),
+			conf.WithSecret(secret),
 		)
 
 		// set the the sys variables

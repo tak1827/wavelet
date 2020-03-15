@@ -29,11 +29,13 @@ import (
 	"net/http"
 	"net/url"
 	"time"
+	"github.com/valyala/fastjson"
 )
 
 type Config struct {
 	APIHost    string
 	APIPort    uint16
+	APISecret  string
 	PrivateKey edwards25519.PrivateKey
 	UseHTTPS   bool
 }
@@ -83,6 +85,7 @@ func (c *Client) Request(path string, method string, body MarshalableJSON) ([]by
 	req.URI().Update(addr)
 	req.Header.SetMethod(method)
 	req.Header.SetContentType("application/json")
+	req.Header.Set("Authorization", "Bearer "+c.APISecret)
 
 	if body != nil {
 		raw, err := body.MarshalJSON()
@@ -366,6 +369,24 @@ func (c *Client) SendTransaction(tag byte, payload []byte) (SendTransactionRespo
 	}
 
 	err := c.RequestJSON(RouteTxSend, ReqPost, &req, &res)
+
+	return res, err
+}
+
+func (c *Client) Connect(address string) (ConnectResponse, error) {
+	// TODO: proper response struct
+	var arena fastjson.Arena
+
+	o := (&fastjson.Arena{}).NewObject()
+	o.Set("address", arena.NewString(address))
+
+	j := jsonRaw(o.MarshalTo(nil))
+
+	var res ConnectResponse
+	err := c.RequestJSON(RouteConnect, ReqPost, j, &res)
+	// if err := c.RequestJSON(RouteConnect, ReqPost, j, &resp); err != nil {
+	// 	return nil, err
+	// }
 
 	return res, err
 }
