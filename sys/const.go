@@ -65,7 +65,7 @@ var (
 
 	// Max graph depth difference to search for eligible transaction
 	// parents from for our node.
-	MaxDepthDiff uint64 = 10
+	MaxDepthDiff uint64 = 100
 
 	//
 	MaxDownloadDepthDiff uint64 = 1500

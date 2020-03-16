@@ -19,7 +19,7 @@ var (
 
 	tag int = 0
 
-	numWorkers int = 1
+	numWorkers int = 10
 )
 
 
@@ -92,7 +92,7 @@ func sendTx(
 	client *wctl.Client,
 	wg *sync.WaitGroup,
 	chErr chan error) {
-time.Sleep(time.Millisecond * 100) 
+time.Sleep(time.Millisecond * 100)
 	defer wg.Done()
 	// Send Non type tx
 	payload := bytes.NewBuffer(nil)

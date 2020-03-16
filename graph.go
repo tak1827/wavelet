@@ -30,6 +30,7 @@ import (
 	"github.com/perlin-network/wavelet/conf"
 	"github.com/perlin-network/wavelet/sys"
 	"github.com/pkg/errors"
+	"github.com/davecgh/go-spew/spew"
 )
 
 type GraphOption func(*Graph)
@@ -135,6 +136,7 @@ func (g *Graph) AddTransaction(tx Transaction) error {
 	}
 
 	if g.rootDepth > conf.GetMaxDepthDiff()+tx.Depth {
+		spew.Dump("************ Add Transaction Faile ************")
 		return ErrDepthTooLow
 	}
 
