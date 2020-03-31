@@ -28,6 +28,7 @@ import (
 	"github.com/perlin-network/wavelet/sys"
 	queue2 "github.com/phf/go-queue/queue"
 	"github.com/pkg/errors"
+	"github.com/davecgh/go-spew/spew"
 )
 
 func collapseTransactions(g *Graph, accounts *Accounts, round uint64, current *Round, start, end Transaction, logging bool) (*collapseResults, error) {
@@ -60,6 +61,7 @@ func collapseTransactions(g *Graph, accounts *Accounts, round uint64, current *R
 			parent := g.FindTransaction(parentID)
 
 			if parent == nil {
+				spew.Dump("||||||||||")
 				g.MarkTransactionAsMissing(parentID, popped.Depth)
 				return nil, errors.Errorf("missing ancestor %x to correctly collapse down ledger state from critical transaction %x", parentID, end.ID)
 			}

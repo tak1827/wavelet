@@ -714,7 +714,22 @@ FINALIZE_ROUNDS:
 			results, err := l.collapseTransactions(current.Index+1, current.End, *eligible, false)
 			if err != nil {
 				spew.Dump("========================")
-				spew.Dump(results)
+
+				// errStr := err.Error()
+				// var endID TransactionID
+  		// 	txID := []byte(errStr[148:])
+  		// 	copy(txID[:], endID[:])
+
+				_collapseState, _ := l.cacheCollapse.LoadOrPut(eligible.ID, &CollapseState{})
+				collapseState := _collapseState.(*CollapseState)
+				spew.Dump(collapseState)
+
+				l.cacheCollapse.Remove(eligible.ID)
+
+				_collapseState2, _ := l.cacheCollapse.LoadOrPut(eligible.ID, &CollapseState{})
+				collapseState2 := _collapseState2.(*CollapseState)
+				spew.Dump(collapseState2)
+
 				logger := log.Node()
 				logger.Error().
 					Err(err).
@@ -1536,7 +1551,10 @@ func (l *Ledger) collapseTransactions(round uint64, start, end Transaction, logg
 	_collapseState, _ := l.cacheCollapse.LoadOrPut(end.ID, &CollapseState{})
 	collapseState := _collapseState.(*CollapseState)
 
+	// spew.Dump(collapseState)
 	collapseState.once.Do(func() {
+		spew.Dump("~~~~~~~~~~")
+		spew.Dump(string(end.ID[:]))
 		collapseState.results, collapseState.err = collapseTransactions(l.graph, l.accounts, round, l.Rounds().Latest(), start, end, logging)
 	})
 
