@@ -24,6 +24,7 @@ import (
 	"github.com/perlin-network/wavelet/conf"
 	"github.com/perlin-network/wavelet/sys"
 	"sync"
+	// "github.com/davecgh/go-spew/spew"
 )
 
 type syncVote struct {
@@ -113,6 +114,8 @@ func CollectVotesForFinalization(
 ) {
 	votes := make([]finalizationVote, 0, snowballK)
 	voters := make(map[AccountID]struct{}, snowballK)
+	tallies := make(map[[32]byte]uint32)
+	var majorityTally uint32 = 0
 
 	for vote := range voteChan {
 		if _, recorded := voters[vote.voter.PublicKey()]; recorded {
@@ -122,75 +125,83 @@ func CollectVotesForFinalization(
 		voters[vote.voter.PublicKey()] = struct{}{}
 		votes = append(votes, vote)
 
+		tallies[vote.round.ID] += vote.round.Transactions
+		// spew.Dump(vote.round.Transactions)
+
 		if len(votes) == cap(votes) {
-			snapshot := accounts.Snapshot()
+			// snapshot := accounts.Snapshot()
 
-			stakes := make(map[AccountID]float64, len(votes))
-			maxStake := float64(0)
+			// stakes := make(map[AccountID]float64, len(votes))
+			// maxStake := float64(0)
 
-			for _, vote := range votes {
-				s, _ := ReadAccountStake(snapshot, vote.voter.PublicKey())
+			// for _, vote := range votes {
+			// 	s, _ := ReadAccountStake(snapshot, vote.voter.PublicKey())
 
-				if s < sys.MinimumStake {
-					s = sys.MinimumStake
-				}
+			// 	if s < sys.MinimumStake {
+			// 		s = sys.MinimumStake
+			// 	}
 
-				stake := float64(s)
-				stakes[vote.voter.PublicKey()] = stake
+			// 	stake := float64(s)
+			// 	stakes[vote.voter.PublicKey()] = stake
 
-				if maxStake < stake {
-					maxStake = stake
-				}
-			}
+			// 	if maxStake < stake {
+			// 		maxStake = stake
+			// 	}
+			// }
 
-			votesStakesPercentages := make(map[AccountID]float64, len(votes))
-			var totalStakePercentages float64
+			// votesStakesPercentages := make(map[AccountID]float64, len(votes))
+			// var totalStakePercentages float64
 
-			votesTransactionsNums := make(map[AccountID]uint32, len(votes))
-			var maxTransactionsNum uint32
+			// votesTransactionsNums := make(map[AccountID]uint32, len(votes))
+			// var maxTransactionsNum uint32
 
-			votesEndDepths := make(map[AccountID]uint64, len(votes))
-			var minEndDepth uint64
-			minEndDepth-- // to have default value for minimal variable as max possible
+			// votesEndDepths := make(map[AccountID]uint64, len(votes))
+			// var minEndDepth uint64
+			// minEndDepth-- // to have default value for minimal variable as max possible
 
-			for _, vote := range votes {
-				percent := stakes[vote.voter.PublicKey()] / maxStake
+			// for _, vote := range votes {
+			// 	percent := stakes[vote.voter.PublicKey()] / maxStake
 
-				votesStakesPercentages[vote.round.ID] += percent
-				totalStakePercentages += percent
+			// 	votesStakesPercentages[vote.round.ID] += percent
+			// 	totalStakePercentages += percent
 
-				votesTransactionsNums[vote.round.ID] = vote.round.Transactions
-				if vote.round.Transactions > maxTransactionsNum {
-					maxTransactionsNum = vote.round.Transactions
-				}
+			// 	votesTransactionsNums[vote.round.ID] = vote.round.Transactions
+			// 	if vote.round.Transactions > maxTransactionsNum {
+			// 		maxTransactionsNum = vote.round.Transactions
+			// 	}
 
-				depth := vote.round.End.Depth - vote.round.Start.Depth
-				votesEndDepths[vote.round.ID] = depth
-				if depth < minEndDepth {
-					minEndDepth = depth
-				}
-			}
+			// 	depth := vote.round.End.Depth - vote.round.Start.Depth
+			// 	votesEndDepths[vote.round.ID] = depth
+			// 	if depth < minEndDepth {
+			// 		minEndDepth = depth
+			// 	}
+			// }
 
 			var majority *Round
 			for _, vote := range votes {
-				stake := (votesStakesPercentages[vote.round.ID] / totalStakePercentages) * conf.GetStakeMajorityWeight()
-
-				var transactions float64
-				if maxTransactionsNum > 0 {
-					transactions = float64(votesTransactionsNums[vote.round.ID]/maxTransactionsNum) * conf.GetTransactionsNumMajorityWeight()
-				}
-
-				var depth float64
-				if votesEndDepths[vote.round.ID] > 0 {
-					depth = float64(minEndDepth/votesEndDepths[vote.round.ID]) * conf.GetRoundDepthMajorityWeight()
-				}
-
-				if stake+transactions+depth >= conf.GetFinalizationVoteThreshold() {
+				if tallies[vote.round.ID] > majorityTally {
 					majority = vote.round
-					break
 				}
+				// stake := (votesStakesPercentages[vote.round.ID] / totalStakePercentages) * conf.GetStakeMajorityWeight()
+
+				// var transactions float64
+				// if maxTransactionsNum > 0 {
+				// 	transactions = float64(votesTransactionsNums[vote.round.ID]/maxTransactionsNum) * conf.GetTransactionsNumMajorityWeight()
+				// }
+
+				// var depth float64
+				// if votesEndDepths[vote.round.ID] > 0 {
+				// 	depth = float64(minEndDepth/votesEndDepths[vote.round.ID]) * conf.GetRoundDepthMajorityWeight()
+				// }
+
+				// if stake+transactions+depth >= conf.GetFinalizationVoteThreshold() {
+				// 	majority = vote.round
+				// 	break
+				// }
 			}
 
+
+			// spew.Dump(majority)
 			snowball.Tick(majority)
 
 			voters = make(map[AccountID]struct{}, snowballK)
